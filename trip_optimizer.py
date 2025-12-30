@@ -4,7 +4,7 @@ Handles trip planning logic with AI integration
 """
 
 import os
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union, Any
 from openai import OpenAI
 from dotenv import load_dotenv
 
@@ -48,12 +48,12 @@ class TripOptimizer:
         if budget <= 0:
             errors["budget"] = "Budget must be a positive number"
         
-        if not preferences or len(preferences) == 0:
+        if not preferences:
             errors["preferences"] = "At least one preference is required"
         
         return errors
     
-    def plan_trip(self, destination: str, budget: float, preferences: List[str]) -> Dict[str, any]:
+    def plan_trip(self, destination: str, budget: float, preferences: List[str]) -> Dict[str, Union[bool, str, float, List[str]]]:
         """
         Plan a trip using AI based on destination, budget, and preferences.
         
@@ -106,6 +106,12 @@ Format the response in a clear, organized manner."""
                 max_tokens=2000
             )
             
+            if not response.choices:
+                return {
+                    "success": False,
+                    "error": "No response generated from AI"
+                }
+            
             trip_plan = response.choices[0].message.content
             
             return {
@@ -122,7 +128,7 @@ Format the response in a clear, organized manner."""
                 "error": f"Failed to generate trip plan: {str(e)}"
             }
     
-    def optimize_itinerary(self, destination: str, budget: float, preferences: List[str], days: int) -> Dict[str, any]:
+    def optimize_itinerary(self, destination: str, budget: float, preferences: List[str], days: int) -> Dict[str, Union[bool, str, float, int, List[str]]]:
         """
         Optimize a trip itinerary for a specific number of days.
         
@@ -179,6 +185,12 @@ Ensure all activities match the user's preferences and stay within the budget.""
                 temperature=0.7,
                 max_tokens=2000
             )
+            
+            if not response.choices:
+                return {
+                    "success": False,
+                    "error": "No response generated from AI"
+                }
             
             optimized_itinerary = response.choices[0].message.content
             
